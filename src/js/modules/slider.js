@@ -3,10 +3,9 @@ export class Slider {
         this.sliderClass = sliderClass;
         this.slider = document.querySelector(`.${sliderClass}`);
         this.slider.style.overflow = 'hidden';
-        this.slidesRealCount = this.slider.childElementCount;
-        this.slidesFakeCount = this.slidesRealCount + 2;
+        this.slidesFakeCount = this.slider.childElementCount + 2;
         this.curentFakeIndex = 1;
-        this.curentTrueIndex = 0;
+        this.curentPosition = 0;
         this.sliderTrack = document.createElement('div');
         this.sliderTrack.classList.add('slider-track');
         while (this.slider.childElementCount > 0) {
@@ -72,7 +71,12 @@ export class Slider {
             {
                 transform: `translateY(-${offset}px)`
             }
-        ], {fill: 'forwards', duration: animDuration, easing: 'ease'});
+        ], {duration: animDuration, easing: 'ease'});
+
+        goAnimation.finished.then(()=>{
+            this.sliderTrack.style.transform = `translateY(-${offset}px)`;
+        });
+        this.curentPosition = offset * -1;
         return goAnimation;
     }
 
@@ -81,50 +85,72 @@ export class Slider {
     }
 
     generateDragging() {
-
+        this.slider.style.cursor = 'grab';
+        
         const mouseMove = (e) => {
-            const y = startY - e.clientY;
-            const x = e.clientX + startX;
+            console.log(`startY: ${startY}`);
+            let range = y - (startY - e.clientY);
 
-            this.setPosition(this.getCurentPosition() - y);
+            if(y !== 0) {
+                this.setPosition(this.getCurentPosition() + range);
+            }
+            y = startY - e.clientY;
+            x = e.clientX + startX;
             console.log(`y: ${y}`);
         };
 
+        const mouseUp = (e) => {
+            if(!e.target.matches('.next-btn') && !e.target.matches('.prev-btn')) {
+                this.slider.style.cursor = 'grab';
+                if(y < 0) {
+                    this.prev();
+                }
+
+                if(y > 0) {
+                    this.next();
+                }
+                y = 0;
+                document.removeEventListener('mousemove', mouseMove);
+            }
+        }
+
         const mouseDown = (e) => {
             e.preventDefault();
-            startY = e.clientY;
-            startX = e.clientX;
-            console.log(`startY: ${startY}`);
-            document.addEventListener('mousemove', mouseMove);
-            document.addEventListener('mouseup', ()=>{
-                document.removeEventListener('mousemove', mouseMove);
-            });
+            if(!e.target.matches('.next-btn') && !e.target.matches('.prev-btn')) {
+                this.slider.style.cursor = 'grabbing';
+                startY = e.clientY;
+                startX = e.clientX;
+                console.log(`startY: ${startY}`);
+                document.addEventListener('mousemove', mouseMove);
+                document.addEventListener('mouseup', mouseUp);
+            }
         };
 
         this.slider.addEventListener('mouseenter', e => {
-            this.slider.style.border = '1px solid green';
             this.slider.addEventListener('mousedown', mouseDown);
         });
         this.slider.addEventListener('mouseleave', e => {
-            this.slider.style.border = '1px solid red';
-            this.slider.removeEventListener('mousedown', mouseDown)
+            this.slider.removeEventListener('mousedown', mouseDown);
         });
 
         let startY = 0;
         let startX = 0;
+        let x = 0;
+        let y = 0;
     }
 
     generateButtons() {
         this.slider.style.position = 'relative';
         const nextBtn = document.createElement('button');
         const prevBtn = document.createElement('button');
-        nextBtn.style.cssText = prevBtn.style.cssText = 'position: absolute; display: block; left: 50%; transform: translateX(-50%)';
+        nextBtn.style.cssText = prevBtn.style.cssText = 'position: absolute; display: block; left: 50%; transform: translateX(-50%); cursor: pointer;';
         nextBtn.textContent = '>';
         nextBtn.classList.add('next-btn');
         nextBtn.style.cssText += 'top: 100%; transform: translate(-50%, -100%)';
         prevBtn.textContent = '<';
-        nextBtn.classList.add('prev-btn');
+        prevBtn.classList.add('prev-btn');
         prevBtn.style.cssText += 'top: 0px;';
+
 
         nextBtn.addEventListener('click', () => {
             this.next();
@@ -138,14 +164,12 @@ export class Slider {
     }
 
     getCurentPosition() {
-        let position = 0;
-        for(let i = 0; i < this.curentFakeIndex; i++) {
-            position -= this.sizeMap[i];
-        }
-        return position;
+        return this.curentPosition;
     }
 
     setPosition(position) {
-        this.sliderTrack.style.transform = `translateY(${position})`;
+        console.log(`position: ${position}`);
+        this.sliderTrack.style.transform = `translateY(${position}px)`;
+        this.curentPosition = position;
     }
 }
