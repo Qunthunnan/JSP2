@@ -8,4 +8,10 @@ import { Slider } from './modules/slider';
 const designModal = new Modal(['button-design'], 'popup-design', 'active', 'popup-content', 'popup-close'),
       consultationModal = new Modal(['button-consultation'], 'popup-consultation', 'active', 'popup-content', 'popup-close'),
       giftModal = new OneTimeModal(['fixed-gift'], 'popup-gift', 'active', 'popup-content', 'popup-close'),
-      mainSlider = new Slider('main-slider', true, true);
+      mainSlider = new Slider({
+        sliderClass: 'main-slider',
+        vertical: false,
+        arrows: true,
+        autoplay: 10000,
+        buttonsImage: require('../assets/img/right-arr.png'),
+      });

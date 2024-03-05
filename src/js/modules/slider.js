@@ -1,23 +1,38 @@
 export class Slider {
-	constructor(sliderClass, vertical = false, arrows = true, autoplay = 10000) {
+	constructor({sliderClass, vertical = false, dragging = true, arrows = true, scrolling = true, autoplay = 10000, buttonsImage}) {
+		this.timer = new Date(0);
 		this.sliderClass = sliderClass;
+		this.autoplayTimerId;
+		this.autoplayTime = autoplay;
+		this.isVertical = vertical;
 		this.slider = document.querySelector(`.${sliderClass}`);
-		this.slider.style.overflow = 'hidden';
+
+		this.images = this.slider.querySelectorAll('img');
+		this.images.forEach(image => {
+			image.style.width = '100%';
+		});
+
 		this.slidesFakeCount = this.slider.childElementCount + 2;
 		this.curentFakeIndex = 1;
 		this.curentPosition = 0;
-		this.sliderTrack = document.createElement('div');
-		this.sliderTrack.classList.add('slider-track');
-		while (this.slider.childElementCount > 0) {
-			this.sliderTrack.append(this.slider.children[0]);
-		}
-		this.sliderTrack.prepend(this.sliderTrack.children[this.sliderTrack.childElementCount - 1].cloneNode(true));
-		this.sliderTrack.append(this.sliderTrack.children[1].cloneNode(true));
+		this.isPlayedAnimation = false;
 
+		this.sliderTrack = document.createElement('div');
+		this.sliderTrack.style.cssText = 'overflow: hidden; height: 100%; width: 100%';
+		this.sliderTrack.classList.add('slider-track');
+		this.sliderList = document.createElement('div');
+		this.sliderList.classList.add('slider-list');
+		while (this.slider.childElementCount > 0) {
+			this.sliderList.append(this.slider.children[0]);
+		}
+		this.sliderList.prepend(this.sliderList.children[this.sliderList.childElementCount - 1].cloneNode(true));
+		this.sliderList.append(this.sliderList.children[1].cloneNode(true));
+		this.sliderTrack.append(this.sliderList);
 		this.slider.append(this.sliderTrack);
+
 		this.sizeMap = [];
 		this.sliderHeight = 0;
-		for(let i of this.sliderTrack.children) {
+		for(let i of this.sliderList.children) {
 			this.sizeMap.push(i.clientHeight);
 			if(this.sliderHeight < i.clientHeight) {
 				this.sliderHeight = i.clientHeight;
@@ -25,41 +40,49 @@ export class Slider {
 		} 
 		this.slider.style.height = `${this.sliderHeight}px`;
 
-		this.go(this.curentFakeIndex);
-
 		if(arrows) {
-			this.generateButtons();
+			this.generateButtons(buttonsImage);
 		}
 
-		this.generateDragging();
-		this.generateScrolling();
+		if(dragging) {
+			this.generateDragging();
+		}
+
+		if(scrolling) {
+			this.generateScrolling();
+		}
+
+		if(autoplay) {
+			this.generateAutoplay();
+		}
+
+		this.go(this.curentFakeIndex);
 	}
 
-	next(offset) {
+	async next(offset) {
 		if(this.curentFakeIndex === this.slidesFakeCount - 2) {
 			this.curentFakeIndex = 1;
-			this.go(0, undefined, offset).finished.then(()=>{
-				this.go(this.curentFakeIndex, true);
-			});
+			await this.go(0, undefined, offset);
+			await this.go(this.curentFakeIndex, true);
 		} else {
 			this.curentFakeIndex++;
-			this.go(this.curentFakeIndex, true, offset);
+			await this.go(this.curentFakeIndex, true, offset);
 		}
 	}
 
-	prev(offset) {
+	async prev(offset) {
 		if(this.curentFakeIndex === 1) {
 			this.curentFakeIndex = this.slidesFakeCount - 2;
-			this.go(this.slidesFakeCount - 1, undefined, offset).finished.then(()=>{
-				this.go(this.curentFakeIndex, true);
-			});
+			await this.go(this.slidesFakeCount - 1, undefined, offset);
+			await this.go(this.curentFakeIndex, true);
 		} else {
 			this.curentFakeIndex--;
-			this.go(this.curentFakeIndex, true, offset);
+			await this.go(this.curentFakeIndex, true, offset);
 		}
 	}
 
-	go(index, isAnimated, addOffset) {
+	async go(index, isAnimated, addOffset) {
+		this.timer = new Date(0);
 		let offset = 0;
 		for(let i = 0; i < index; i++) {
 			offset+= this.sizeMap[i];
@@ -71,31 +94,42 @@ export class Slider {
 		if(isAnimated) {
 			animDuration = 500;
 		}
-		const goAnimation = this.sliderTrack.animate([
+		const goAnimation = this.sliderList.animate([
 			{
 				transform: `translateY(-${offset}px)`
 			}
 		], {duration: animDuration, easing: 'ease'});
 
-		goAnimation.finished.then(()=>{
-			this.sliderTrack.style.transform = `translateY(-${offset}px)`;
+		
+		await goAnimation.finished.then(()=>{
+			this.sliderList.style.transform = `translateY(-${offset}px)`;
+			this.curentPosition = offset * -1;
+			this.isPlayedAnimation = false;
+			return goAnimation;
 		});
-		this.curentPosition = offset * -1;
-		return goAnimation;
 	}
 
 	generateAutoplay() {
+		this.autoplayTimerId = setInterval(() => {
+			this.next();
+		}, this.autoplayTime);
+	}
 
+	resetAutoplay() {
+		clearInterval(this.autoplayTimerId);
+		this.generateAutoplay();
+	}
+
+	stopAutoplay() {
+		clearInterval(this.autoplayTimerId);
 	}
 
 	generateScrolling() {
 		let sumDelta = 0;
 		let resetDeltaId;
 		const scrolling = (e) => {
-			console.log(e);
-			console.log(`sumDelta: ${sumDelta}`);
+			this.resetAutoplay();
 			sumDelta += e.deltaY;
-
 			if(resetDeltaId) {
 				clearTimeout(resetDeltaId);
 			}
@@ -104,7 +138,7 @@ export class Slider {
 				sumDelta = 0;
 			}, 1000);
 
-			if (Math.abs(sumDelta) >= 200) {
+			if (Math.abs(sumDelta) >= 200 && !this.isPlayedAnimation) {
 				if(sumDelta > 0) {
 					this.next();
 				} else {
@@ -115,9 +149,7 @@ export class Slider {
 				clearTimeout(resetDeltaId);
 			}
 		}
-
-		// left: 37, up: 38, right: 39, down: 40,
-		// spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
+		//for switching scrolling on mouseenter mouseleave events
 		var keys = {37: 1, 38: 1, 39: 1, 40: 1};
 
 		function preventDefault(e) {
@@ -140,7 +172,6 @@ export class Slider {
 		var wheelOpt = supportsPassive ? { passive: false } : false;
 		var wheelEvent = 'onwheel' in document.createElement('div') ? 'wheel' : 'mousewheel';
 
-		// call this to Disable
 		function disableScroll() {
 			window.addEventListener('DOMMouseScroll', preventDefault, false); // older FF
 			window.addEventListener(wheelEvent, preventDefault, wheelOpt); // modern desktop
@@ -148,7 +179,6 @@ export class Slider {
 			window.addEventListener('keydown', preventDefaultForScrollKeys, false);
 		}
 
-		// call this to Enable
 		function enableScroll() {
 			window.removeEventListener('DOMMouseScroll', preventDefault, false);
 			window.removeEventListener(wheelEvent, preventDefault, wheelOpt); 
@@ -170,7 +200,6 @@ export class Slider {
 		this.slider.style.cursor = 'grab';
 		
 		const mouseMove = (e) => {
-			console.log(`startY: ${startY}`);
 			let range = y - (startY - e.clientY);
 
 			if(y !== 0) {
@@ -178,11 +207,11 @@ export class Slider {
 			}
 			y = startY - e.clientY;
 			x = e.clientX + startX;
-			console.log(`y: ${y}`);
 		};
 
 		const mouseUp = (e) => {
 			if(!e.target.matches('.next-btn') && !e.target.matches('.prev-btn')) {
+				this.generateAutoplay();
 				const calculateOffset = () => {
 					let sum = 0;
 					for(let i = 0; i < this.curentFakeIndex; i++) {
@@ -217,10 +246,10 @@ export class Slider {
 		const mouseDown = (e) => {
 			e.preventDefault();
 			if(!e.target.matches('.next-btn') && !e.target.matches('.prev-btn')) {
+				this.stopAutoplay();
 				this.slider.style.cursor = 'grabbing';
 				startY = e.clientY;
 				startX = e.clientX;
-				console.log(`startY: ${startY}`);
 				document.addEventListener('mousemove', mouseMove);
 				document.addEventListener('mouseup', mouseUp);
 			}
@@ -239,24 +268,40 @@ export class Slider {
 		let y = 0;
 	}
 
-	generateButtons() {
+	generateButtons(image) {
 		this.slider.style.position = 'relative';
 		const nextBtn = document.createElement('button');
 		const prevBtn = document.createElement('button');
-		nextBtn.style.cssText = prevBtn.style.cssText = 'position: absolute; display: block; left: 50%; transform: translateX(-50%); cursor: pointer;';
-		nextBtn.textContent = '>';
+		const buttonImage = image ? `<img src="${image}" style="height: inherit; width: inherit;">` : `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
+		<title></title>
+		<g id="icomoon-ignore">
+		</g>
+		<path fill="#717171c7" d="M320 0c176.731 0 320 143.269 320 320s-143.269 320-320 320v0c-176.731 0-320-143.269-320-320s143.269-320 320-320v0zM64 320c0 141.385 114.615 256 256 256s256-114.615 256-256v0c0-141.385-114.615-256-256-256s-256 114.615-256 256v0zM401.28 342.4l-113.28 113.6-45.12-45.12 89.92-90.88-89.6-90.56 44.8-45.12 135.68 135.68-22.4 22.4z"></path>
+		</svg>`;
+		const absoluteStyles = this.isVertical ? 'left: 50%;' : 'top: 50%;';
+		const prevBtnStyles = this.isVertical ? 'top: -7%; transform: translateX(-50%) rotate(270deg);' : 'left: -7%; transform: translateY(-50%) rotate(180deg)';
+		const nextBtnStyles = this.isVertical ? 'top: 107%; transform: translate(-50%, -100%) rotate(90deg);' : 'left: 107%; transform: translate(-100%, -50%);';
+		nextBtn.style.cssText = prevBtn.style.cssText = `height: 30px; width: 30px; position: absolute; z-index: 5; display: block; line-height: 0; padding: 0; border: none; background: #00000000; border-radius: 100%; ${absoluteStyles} cursor: pointer;`;
+		nextBtn.innerHTML = prevBtn.innerHTML = buttonImage;
 		nextBtn.classList.add('next-btn');
-		nextBtn.style.cssText += 'top: 100%; transform: translate(-50%, -100%)';
-		prevBtn.textContent = '<';
+		nextBtn.style.cssText += nextBtnStyles;
 		prevBtn.classList.add('prev-btn');
-		prevBtn.style.cssText += 'top: 0px;';
+		prevBtn.style.cssText += prevBtnStyles;
 
+		let counter = 0;
 
-		nextBtn.addEventListener('click', () => {
-			this.next();
+		nextBtn.addEventListener('click', async () => {
+			if(!this.isPlayedAnimation) {
+				counter++;
+				await this.next(undefined, counter);
+				this.resetAutoplay();
+			}
 		});
-		prevBtn.addEventListener('click', () => {
-			this.prev();
+		prevBtn.addEventListener('click', async () => {
+			if(!this.isPlayedAnimation) {
+				await this.prev();
+				this.resetAutoplay();
+			}
 		});
 
 		this.slider.append(prevBtn);
@@ -268,8 +313,7 @@ export class Slider {
 	}
 
 	setPosition(position) {
-		console.log(`position: ${position}`);
-		this.sliderTrack.style.transform = `translateY(${position}px)`;
+		this.sliderList.style.transform = `translateY(${position}px)`;
 		this.curentPosition = position;
 	}
 }
