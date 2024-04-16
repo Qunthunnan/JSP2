@@ -12,6 +12,6 @@ const designModal = new Modal(['button-design'], 'popup-design', 'active', 'popu
         sliderClass: 'main-slider',
         vertical: false,
         arrows: true,
-        autoplay: 10000,
+        autoplay: false,
         buttonsImage: require('../assets/img/right-arr.png'),
       });

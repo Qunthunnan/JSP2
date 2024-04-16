@@ -86,6 +86,7 @@ export class Slider {
 		let offset = 0;
 		for(let i = 0; i < index; i++) {
 			offset+= this.sizeMap[i];
+			offset++;
 		}
 		if(addOffset) {
 			offset -= addOffset;
@@ -94,6 +95,7 @@ export class Slider {
 		if(isAnimated) {
 			animDuration = 500;
 		}
+		this.isPlayedAnimation = true;
 		const goAnimation = this.sliderList.animate([
 			{
 				transform: `translateY(-${offset}px)`
@@ -110,18 +112,24 @@ export class Slider {
 	}
 
 	generateAutoplay() {
-		this.autoplayTimerId = setInterval(() => {
-			this.next();
-		}, this.autoplayTime);
+		if(this.autoplayTime) {
+			this.autoplayTimerId = setInterval(() => {
+				this.next();
+			}, this.autoplayTime);
+		}
 	}
 
 	resetAutoplay() {
-		clearInterval(this.autoplayTimerId);
-		this.generateAutoplay();
+		if(this.autoplayTime) { 
+			this.stopAutoplay();
+			this.generateAutoplay();
+		}
 	}
 
 	stopAutoplay() {
-		clearInterval(this.autoplayTimerId);
+		if(this.autoplayTime) {
+			clearInterval(this.autoplayTimerId);
+		}
 	}
 
 	generateScrolling() {
@@ -210,7 +218,7 @@ export class Slider {
 		};
 
 		const mouseUp = (e) => {
-			if(!e.target.matches('.next-btn') && !e.target.matches('.prev-btn')) {
+			if(!e.target.closest('.next-btn') && !e.target.closest('.prev-btn')) {
 				this.generateAutoplay();
 				const calculateOffset = () => {
 					let sum = 0;
@@ -245,7 +253,7 @@ export class Slider {
 
 		const mouseDown = (e) => {
 			e.preventDefault();
-			if(!e.target.matches('.next-btn') && !e.target.matches('.prev-btn')) {
+			if(!e.target.closest('.next-btn') && !e.target.closest('.prev-btn')) {
 				this.stopAutoplay();
 				this.slider.style.cursor = 'grabbing';
 				startY = e.clientY;
@@ -288,12 +296,9 @@ export class Slider {
 		prevBtn.classList.add('prev-btn');
 		prevBtn.style.cssText += prevBtnStyles;
 
-		let counter = 0;
-
 		nextBtn.addEventListener('click', async () => {
 			if(!this.isPlayedAnimation) {
-				counter++;
-				await this.next(undefined, counter);
+				await this.next();
 				this.resetAutoplay();
 			}
 		});
