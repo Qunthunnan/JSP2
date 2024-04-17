@@ -10,8 +10,11 @@ const designModal = new Modal(['button-design'], 'popup-design', 'active', 'popu
       giftModal = new OneTimeModal(['fixed-gift'], 'popup-gift', 'active', 'popup-content', 'popup-close'),
       mainSlider = new Slider({
         sliderClass: 'main-slider',
-        vertical: false,
+        vertical: true,
+        scrolling: true,
         arrows: true,
         autoplay: false,
+        dragging: false,
+        autoplay: 1000,
         buttonsImage: require('../assets/img/right-arr.png'),
       });

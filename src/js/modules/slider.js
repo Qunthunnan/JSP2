@@ -1,14 +1,19 @@
 export class Slider {
 	constructor({sliderClass, vertical = false, dragging = true, arrows = true, scrolling = true, autoplay = 10000, buttonsImage}) {
-		this.timer = new Date(0);
 		this.sliderClass = sliderClass;
 		this.autoplayTimerId;
 		this.autoplayTime = autoplay;
 		this.isVertical = vertical;
 		this.slider = document.querySelector(`.${sliderClass}`);
+		
+		this.sliderWidth = 9999999999999;
 
 		this.images = this.slider.querySelectorAll('img');
 		this.images.forEach(image => {
+			const imageWidth = +getComputedStyle(image).width.replace(/(\d*)px/, '$1');
+			if(imageWidth < this.sliderWidth) {
+				this.sliderWidth = imageWidth;
+			}
 			image.style.width = '100%';
 		});
 
@@ -17,28 +22,42 @@ export class Slider {
 		this.curentPosition = 0;
 		this.isPlayedAnimation = false;
 
+
 		this.sliderTrack = document.createElement('div');
 		this.sliderTrack.style.cssText = 'overflow: hidden; height: 100%; width: 100%';
 		this.sliderTrack.classList.add('slider-track');
+
 		this.sliderList = document.createElement('div');
+		//horizontal
+		if(!vertical) {
+			this.sliderList.style.cssText = 'display: flex; height: 100%';
+			for(let listItem of this.slider.children) {
+				listItem.style.cssText = 'flex-shrink: 0';
+			}
+		}
 		this.sliderList.classList.add('slider-list');
 		while (this.slider.childElementCount > 0) {
 			this.sliderList.append(this.slider.children[0]);
 		}
-		this.sliderList.prepend(this.sliderList.children[this.sliderList.childElementCount - 1].cloneNode(true));
-		this.sliderList.append(this.sliderList.children[1].cloneNode(true));
+		this.sliderList.prepend(this.sliderList.children[this.sliderList.childElementCount - 1].cloneNode(true));  //fake slides
+		this.sliderList.append(this.sliderList.children[1].cloneNode(true)); //fake slides
 		this.sliderTrack.append(this.sliderList);
 		this.slider.append(this.sliderTrack);
 
 		this.sizeMap = [];
 		this.sliderHeight = 0;
+
 		for(let i of this.sliderList.children) {
-			this.sizeMap.push(i.clientHeight);
-			if(this.sliderHeight < i.clientHeight) {
+			if(this.isVertical)
+				this.sizeMap.push(i.clientHeight);
+			else
+				this.sizeMap.push(i.clientWidth);
+
+			if(this.sliderHeight < i.clientHeight) { //calculating slider height
 				this.sliderHeight = i.clientHeight;
 			}
 		} 
-		this.slider.style.height = `${this.sliderHeight}px`;
+		this.slider.style.cssText = `height: ${this.sliderHeight}px;`;
 
 		if(arrows) {
 			this.generateButtons(buttonsImage);
@@ -82,8 +101,8 @@ export class Slider {
 	}
 
 	async go(index, isAnimated, addOffset) {
-		this.timer = new Date(0);
 		let offset = 0;
+		let axis = this.isVertical ? 'Y' : 'X'; //vertical / horizontal ?
 		for(let i = 0; i < index; i++) {
 			offset+= this.sizeMap[i];
 			offset++;
@@ -98,13 +117,13 @@ export class Slider {
 		this.isPlayedAnimation = true;
 		const goAnimation = this.sliderList.animate([
 			{
-				transform: `translateY(-${offset}px)`
+				transform: `translate${axis}(-${offset}px)`
 			}
 		], {duration: animDuration, easing: 'ease'});
 
 		
 		await goAnimation.finished.then(()=>{
-			this.sliderList.style.transform = `translateY(-${offset}px)`;
+			this.sliderList.style.transform = `translate${axis}(-${offset}px)`;
 			this.curentPosition = offset * -1;
 			this.isPlayedAnimation = false;
 			return goAnimation;
@@ -208,18 +227,27 @@ export class Slider {
 		this.slider.style.cursor = 'grab';
 		
 		const mouseMove = (e) => {
-			let range = y - (startY - e.clientY);
+			let rangeY = y - (startY - e.clientY);
+			let rangeX = x - (startX - e.clientX);
 
-			if(y !== 0) {
-				this.setPosition(this.getCurentPosition() + range);
+			if(this.isVertical) {
+				if(y !== 0) {
+					this.setPosition(this.getCurentPosition() + rangeY);
+				}
+			} else {
+				if(x !== 0) {
+					this.setPosition(this.getCurentPosition() + rangeX);
+				}
 			}
+
 			y = startY - e.clientY;
-			x = e.clientX + startX;
+			x = startX - e.clientX;
 		};
 
 		const mouseUp = (e) => {
 			if(!e.target.closest('.next-btn') && !e.target.closest('.prev-btn')) {
 				this.generateAutoplay();
+
 				const calculateOffset = () => {
 					let sum = 0;
 					for(let i = 0; i < this.curentFakeIndex; i++) {
@@ -230,7 +258,9 @@ export class Slider {
 
 				this.slider.style.cursor = 'grab';
 
-				if(y < 0) {
+				let target = this.isVertical ? y : x; //What is target direction horizontal or vertical?
+
+				if(target < 0) {
 					if(this.curentFakeIndex === 1) {
 						this.prev(calculateOffset());
 					} else {
@@ -238,7 +268,7 @@ export class Slider {
 					}
 				}
 
-				if(y > 0) {
+				if(target > 0) {
 					if(this.curentFakeIndex === this.slidesFakeCount - 2) {
 						this.next(calculateOffset());
 					} else {
@@ -246,7 +276,7 @@ export class Slider {
 					}
 				}
 
-				y = 0;
+				y = x = 0;
 				document.removeEventListener('mousemove', mouseMove);
 			}
 		}
@@ -318,7 +348,8 @@ export class Slider {
 	}
 
 	setPosition(position) {
-		this.sliderList.style.transform = `translateY(${position}px)`;
+		const axis = this.isVertical ? 'Y' : 'X';
+		this.sliderList.style.transform = `translate${axis}(${position}px)`;
 		this.curentPosition = position;
 	}
 }
