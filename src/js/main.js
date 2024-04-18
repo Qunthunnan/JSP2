@@ -12,9 +12,14 @@ const designModal = new Modal(['button-design'], 'popup-design', 'active', 'popu
         sliderClass: 'main-slider',
         vertical: true,
         scrolling: true,
+        arrows: false,
+        dragging: true,
+        autoplay: 10000,
+      }),
+      feedbackSlider = new Slider({
+        sliderClass: 'feedback-slider',
+        vertical: false,
         arrows: true,
         autoplay: false,
-        dragging: false,
-        autoplay: 1000,
-        buttonsImage: require('../assets/img/right-arr.png'),
+        buttonsImage: require('../assets/img/right-arr.png')
       });

@@ -6,16 +6,15 @@ export class Slider {
 		this.isVertical = vertical;
 		this.slider = document.querySelector(`.${sliderClass}`);
 		
-		this.sliderWidth = 9999999999999;
 
-		this.images = this.slider.querySelectorAll('img');
-		this.images.forEach(image => {
-			const imageWidth = +getComputedStyle(image).width.replace(/(\d*)px/, '$1');
-			if(imageWidth < this.sliderWidth) {
-				this.sliderWidth = imageWidth;
-			}
-			image.style.width = '100%';
-		});
+		// this.images = this.slider.querySelectorAll('img');
+		// this.images.forEach(image => {
+		// 	const imageWidth = +getComputedStyle(image).width.replace(/(\d*)px/, '$1');
+		// 	if(imageWidth < this.sliderWidth) {
+		// 		this.sliderWidth = imageWidth;
+		// 	}
+		// 	image.style.width = '100%';
+		// });
 
 		this.slidesFakeCount = this.slider.childElementCount + 2;
 		this.curentFakeIndex = 1;
@@ -48,6 +47,7 @@ export class Slider {
 		this.sliderHeight = 0;
 
 		for(let i of this.sliderList.children) {
+			i.style.width = '100%';
 			if(this.isVertical)
 				this.sizeMap.push(i.clientHeight);
 			else
@@ -55,7 +55,7 @@ export class Slider {
 
 			if(this.sliderHeight < i.clientHeight) { //calculating slider height
 				this.sliderHeight = i.clientHeight;
-			}
+			}		
 		} 
 		this.slider.style.cssText = `height: ${this.sliderHeight}px;`;
 
