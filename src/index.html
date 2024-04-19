@@ -228,7 +228,7 @@
 			<h2>Рассчитайте стоимость и получите скидку 30%</h2>
 			<div class=row>
 				<div class="col-md-4 col-offset-1">
-					<form class=form action=# method=POST enctype=multipart/form-data>
+					<form class="form calculatorForm" action=# method=POST enctype=multipart/form-data>
 						<h4>Загрузите свое фото</h4>
 						<div class=file_upload>
 							<button type=button>Загрузить фотографию</button>
@@ -587,7 +587,7 @@
 			<p class=p-heading>Остались вопросы?</p>
 			<h2>Получите консультацию художника!</h2>
 			<div class="col-md-10 col-md-offset-1">
-				<form action=# method=POST>
+				<form class="consultationForm" action=# method=POST>
 					<div class=input-wrapper>
 						<input type=text name=name placeholder="Ваше имя" required>
 						<input type=text name=phone placeholder="Ваш телефон" required>
@@ -653,10 +653,10 @@
 	<div class=popup-consultation data-modal>
 		<div class=popup-dialog>
 			<div class=popup-content>
-				<button class=popup-close>&times;</button>
+				<button class="popup-close closeModal">&times;</button>
 				<h4>Остались вопросы? Закажите обратный звонок</h4>
 				<div class=main-form>
-					<form class=form action=# method=POST>
+					<form class="form mainForm" action=# method=POST>
 						<input type=text name=name placeholder="Ваше имя" required>
 						<input type=text name=phone placeholder="Ваш телефон" required>
 						<button class="button button-order">Получить консультацию</button>
@@ -668,7 +668,7 @@
 	<div class="popup-gift" data-modal>
 		<div class=popup-dialog>
 			<div class=popup-content>
-				<button class=popup-close>&times;</button>
+				<button class="popup-close closeModal">&times;</button>
 				<h2>У нас для вас есть подарок!</h2>
 				<img src="assets/img/gift.png" alt="">
 				<p>Введите промо-код IWANTPOPART и получите скидку 30% на портрет любого размера в стиле pop-art!</p>
@@ -678,8 +678,8 @@
 	<div class=popup-design data-modal>
 		<div class=popup-dialog>
 			<div class=popup-content>
-				<button class=popup-close>&times;</button>
-				<form action=# enctype=multipart/form-data>
+				<button class="popup-close closeModal">&times;</button>
+				<form class="designForm" action=# enctype=multipart/form-data>
 					<h4>Заказать дизайн портрета</h4>
 					<div class=file_upload>
 						<button type=button>Загрузить фотографию</button>
@@ -696,6 +696,26 @@
 						</div>
 					</div>
 				</form>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup-design messageDone" data-modal>
+		<div class=popup-dialog>
+			<div class=popup-content>
+				<button class="popup-close closeModal">&times;</button>
+					<h4 class="popup-message">Ми усе записали та вже працюємо над вашим замовленням!</h4>
+					<button class="button button-order closeModal">Дякую</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="popup-design messageError" data-modal>
+		<div class=popup-dialog>
+			<div class=popup-content>
+				<button class=popup-close>&times;</button>
+					<h4 class="popup-message">Схоже, сталась помилка, спробуйте пізніше..</h4>
+					<button class="button button-order closeModal">Закрити</button>
 			</div>
 		</div>
 	</div>

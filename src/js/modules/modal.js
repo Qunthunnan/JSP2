@@ -1,3 +1,4 @@
+import { appState } from '../main';
 export class Modal {
     constructor(entries, modalClass, activityClass, contentClass, closeBtnClass, customAnimation) {
         this.entries = entries;
@@ -21,7 +22,7 @@ export class Modal {
         });
     }
 
-    closeModal  = (e = {target:this.closeBtnClass}) => {
+    closeModal  = (e = {target: document.querySelector(`.${this.closeBtnClass}`)} ) => {
         if (e.target.matches(`.${this.closeBtnClass}`) || !e.target.matches(`.${this.contentClass}`) && !e.target.closest(`.${this.contentClass}`) && e.target.classList[0] !== 'ripple') {
             const modalElement = document.querySelector(`.${this.modalClass}`);
             const modalContent = document.querySelector(`.${this.modalClass} .${this.contentClass}`);
@@ -42,6 +43,7 @@ export class Modal {
 
             amimationClose.finished.then( result => {
                 modalElement.classList.remove(this.activityClass);
+                appState.curentOpenedModal = undefined; //updating general app state
                 modalElement.removeEventListener('click', close);
             });
         }
@@ -52,6 +54,9 @@ export class Modal {
         const modalContent = document.querySelector(`.${this.modalClass} .${this.contentClass}`);
 
         modalElement.classList.add(this.activityClass);
+
+        appState.curentOpenedModal = this.modalClass; //updating general app state
+
         const animationOpen = modalContent.animate([
             {
                 transform: 'translateX(-50%) scale(0.1)',
