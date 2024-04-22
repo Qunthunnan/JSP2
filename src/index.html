@@ -235,26 +235,26 @@
 							<div>Файл не выбран</div>
 							<input type=file name=upload>
 						</div>
-						<select id=size>
+						<select name="size" id=size>
 							<option >Выберите размер картины</option>
-							<option >40x50</option>
-							<option >50x70</option>
-							<option >70x70</option>
-							<option >70x100</option>
+							<option data-value="40x50" >40x50</option>
+							<option data-value="50x70" >50x70</option>
+							<option data-value="70x70" >70x70</option>
+							<option data-value="70x100" >70x100</option>
 						</select>
-						<select id=material>
+						<select name="material" id=material>
 							<option >Выберите материал картины</option>
-							<option   title="Изящный, позволяет легко создавать текстуру, подходит для декоративных картин маслом.">Холст из волокна</option>
-							<option   title="Достаточно грубый и создает ощущение реальности, подходит для классических пейзажей, натюрмортов и портретов.">Льняной холст</option>
-							<option  title="Изящный, подходит для всех типов реалистичных портретов.">Холст из натурального хлопка</option>
+							<option data-value="fiber"   title="Изящный, позволяет легко создавать текстуру, подходит для декоративных картин маслом.">Холст из волокна</option>
+							<option data-value="linen" title="Достаточно грубый и создает ощущение реальности, подходит для классических пейзажей, натюрмортов и портретов.">Льняной холст</option>
+							<option data-value="coton" title="Изящный, подходит для всех типов реалистичных портретов.">Холст из натурального хлопка</option>
 						</select>
-						<select id=options>
+						<select name="extra" id=options>
 							<option >Дополнительные услуги</option>
-							<option >Покрытие арт-гелем</option>
-							<option >Экспресс-изготовление</option>
-							<option >Доставка готовых работ </option>
+							<option data-value="artGel" >Покрытие арт-гелем</option>
+							<option data-value="express" >Экспресс-изготовление</option>
+							<option data-value="delivery" >Доставка готовых работ </option>
 						</select>
-						<input type="text" class="promocode" placeholder="Введите ваш промокод">
+						<input name="promo" type="text" class="promocode" placeholder="Введите ваш промокод">
 						<div class=calc-price>Для расчета нужно выбрать размер картины и материал картины</div>
 						<button class="button button-order">Быстрый заказ</button>
 					</form>
@@ -590,7 +590,7 @@
 				<form class="consultationForm" action=# method=POST>
 					<div class=input-wrapper>
 						<input type=text name=name placeholder="Ваше имя" required>
-						<input type=text name=phone placeholder="Ваш телефон" required>
+						<input type=text name=phone class="mobilePhone" placeholder="Ваш телефон" required>
 						<input type=text name=email placeholder="Ваш E-mail">
 						<input class=input-text name=message type=text placeholder="Задайте ваш вопрос здесь" required>
 					</div>
@@ -658,7 +658,7 @@
 				<div class=main-form>
 					<form class="form mainForm" action=# method=POST>
 						<input type=text name=name placeholder="Ваше имя" required>
-						<input type=text name=phone placeholder="Ваш телефон" required>
+						<input type=text name=phone class="mobilePhone" placeholder="Ваш телефон" required>
 						<button class="button button-order">Получить консультацию</button>
 					</form>
 				</div>
@@ -689,7 +689,7 @@
 					<div class=main-form>
 						<div class=form>
 							<input type=text name=name placeholder="Ваше имя" required>
-							<input type=text name=phone placeholder="Ваш телефон" required>
+							<input type=text name=phone class="mobilePhone" placeholder="Ваш телефон" required>
 							<input type=text name=email placeholder="Ваш e-mail">
 							<textarea name=message placeholder=Комментарий rows=2></textarea>
 							<button class="button button-order">Отправить дизайнеру</button>
@@ -713,7 +713,7 @@
 	<div class="popup-design messageError" data-modal>
 		<div class=popup-dialog>
 			<div class=popup-content>
-				<button class=popup-close>&times;</button>
+				<button class="popup-close closeModal">&times;</button>
 					<h4 class="popup-message">Схоже, сталась помилка, спробуйте пізніше..</h4>
 					<button class="button button-order closeModal">Закрити</button>
 			</div>

@@ -95,6 +95,13 @@ export class Form {
             }
         }
 
+        if(this.rules[inputName].requiredSelect) {
+            if(!this.validateRequiredSelect(inputName)) {
+                this.results[inputName] = false;
+                this.errors[inputName] = this.messages[inputName].requiredSelect;
+            }
+        }
+
         this.updateErrors(inputName);
         return this.results[inputName];
     }
@@ -120,6 +127,14 @@ export class Form {
         if(this.rules[inputName].reg.test(validatedInput.value)) {
             return true;
         } 
+        return false;
+    }
+
+    validateRequiredSelect(selectName) {
+        const validatedSelect = this.formElement.querySelector(`[name=${selectName}]`);
+        if(validatedSelect.options[validatedSelect.selectedIndex].getAttribute(this.rules[selectName].requiredSelect)) {
+            return true;
+        }
         return false;
     }
 
@@ -165,11 +180,20 @@ export class Form {
         const loaderOverlay = document.createElement('div');
         loaderOverlay.classList.add('loaderOverlay');
         loaderOverlay.style.cssText = 'height: 100vh;  width: 100vw; background: rgba(178, 80, 188, 0.8); position: fixed; top: 0px; left: 0px; display: flex; align-items: center; justify-content: center';
-        loaderOverlay.innerHTML = `<img style="height: 100px" src="${loader}" alt="loader">`;
+        loaderOverlay.innerHTML = `<img style="height: 100px" src="${await loader}" alt="loader">`;
         document.documentElement.append(loaderOverlay);
 
         const form = new FormData(this.formElement);
         let userData = Object.fromEntries(form.entries());
+
+        for(let element of this.formElement) {
+            if(element.nodeName === 'SELECT') {
+                const selectedElement = element[element.selectedIndex];
+                if(selectedElement.getAttribute(`data-value`)) {
+                    userData[element.getAttribute('name')] = selectedElement.getAttribute(`data-value`);
+                }
+            }
+        }
         
         const response = await fetch('/server.php', {
             headers: {
