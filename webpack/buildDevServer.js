@@ -6,6 +6,7 @@ module.exports = function devServer () {
             directory: path.join('./dist'),
         },
         compress: true,
+        hot: true,
         port: 9000,
     }
 }

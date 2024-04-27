@@ -5,28 +5,22 @@ export class Slider {
 		this.autoplayTime = autoplay;
 		this.isVertical = vertical;
 		this.slider = document.querySelector(`.${sliderClass}`);
-		
-
-		// this.images = this.slider.querySelectorAll('img');
-		// this.images.forEach(image => {
-		// 	const imageWidth = +getComputedStyle(image).width.replace(/(\d*)px/, '$1');
-		// 	if(imageWidth < this.sliderWidth) {
-		// 		this.sliderWidth = imageWidth;
-		// 	}
-		// 	image.style.width = '100%';
-		// });
 
 		this.slidesFakeCount = this.slider.childElementCount + 2;
 		this.curentFakeIndex = 1;
 		this.curentPosition = 0;
 		this.isPlayedAnimation = false;
 
-
 		this.sliderTrack = document.createElement('div');
 		this.sliderTrack.style.cssText = 'overflow: hidden; height: 100%; width: 100%';
 		this.sliderTrack.classList.add('slider-track');
 
 		this.sliderList = document.createElement('div');
+
+		this.nextBtn;
+		this.prevBtn;
+		this.buttonsImage = buttonsImage;
+		
 		//horizontal
 		if(!vertical) {
 			this.sliderList.style.cssText = 'display: flex; height: 100%';
@@ -57,10 +51,11 @@ export class Slider {
 				this.sliderHeight = i.clientHeight;
 			}		
 		} 
-		this.slider.style.cssText = `height: ${this.sliderHeight}px;`;
+
+		this.slider.style.cssText += `height: ${this.sliderHeight}px;`;
 
 		if(arrows) {
-			this.generateButtons(buttonsImage);
+			this.generateButtons();
 		}
 
 		if(dragging) {
@@ -76,6 +71,26 @@ export class Slider {
 		}
 
 		this.go(this.curentFakeIndex);
+	}
+
+	rebuildSlider() {
+		this.sizeMap = [];
+		this.sliderHeight = 0;
+
+		for(let i of this.sliderList.children) {
+			if(this.isVertical)
+				this.sizeMap.push(i.clientHeight);
+			else
+				this.sizeMap.push(i.clientWidth);
+
+			if(this.sliderHeight < i.clientHeight) {
+				this.sliderHeight = i.clientHeight;
+			}		
+		} 
+		
+		this.slider.style.cssText += `height: ${this.sliderHeight}px;`;
+
+		this.go(this.curentFakeIndex, false);
 	}
 
 	async next(offset) {
@@ -306,41 +321,49 @@ export class Slider {
 		let y = 0;
 	}
 
-	generateButtons(image) {
-		this.slider.style.position = 'relative';
-		const nextBtn = document.createElement('button');
-		const prevBtn = document.createElement('button');
-		const buttonImage = image ? `<img src="${image}" style="height: inherit; width: inherit;">` : `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
-		<title></title>
-		<g id="icomoon-ignore">
-		</g>
-		<path fill="#717171c7" d="M320 0c176.731 0 320 143.269 320 320s-143.269 320-320 320v0c-176.731 0-320-143.269-320-320s143.269-320 320-320v0zM64 320c0 141.385 114.615 256 256 256s256-114.615 256-256v0c0-141.385-114.615-256-256-256s-256 114.615-256 256v0zM401.28 342.4l-113.28 113.6-45.12-45.12 89.92-90.88-89.6-90.56 44.8-45.12 135.68 135.68-22.4 22.4z"></path>
-		</svg>`;
-		const absoluteStyles = this.isVertical ? 'left: 50%;' : 'top: 50%;';
-		const prevBtnStyles = this.isVertical ? 'top: -7%; transform: translateX(-50%) rotate(270deg);' : 'left: -7%; transform: translateY(-50%) rotate(180deg)';
-		const nextBtnStyles = this.isVertical ? 'top: 107%; transform: translate(-50%, -100%) rotate(90deg);' : 'left: 107%; transform: translate(-100%, -50%);';
-		nextBtn.style.cssText = prevBtn.style.cssText = `height: 30px; width: 30px; position: absolute; z-index: 5; display: block; line-height: 0; padding: 0; border: none; background: #00000000; border-radius: 100%; ${absoluteStyles} cursor: pointer;`;
-		nextBtn.innerHTML = prevBtn.innerHTML = buttonImage;
-		nextBtn.classList.add('next-btn');
-		nextBtn.style.cssText += nextBtnStyles;
-		prevBtn.classList.add('prev-btn');
-		prevBtn.style.cssText += prevBtnStyles;
+	generateButtons() {
+		if(!document.querySelector('.next-btn') && !document.querySelector('.prev-btn')) {
+			this.slider.style.cssText += 'position: relative;';
+			this.nextBtn = document.createElement('button');
+			this.prevBtn = document.createElement('button');
+			const buttonImage = this.buttonsImage ? `<img src="${this.buttonsImage}" style="height: inherit; width: inherit;">` : `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 640 640">
+			<title></title>
+			<g id="icomoon-ignore">
+			</g>
+			<path fill="#717171c7" d="M320 0c176.731 0 320 143.269 320 320s-143.269 320-320 320v0c-176.731 0-320-143.269-320-320s143.269-320 320-320v0zM64 320c0 141.385 114.615 256 256 256s256-114.615 256-256v0c0-141.385-114.615-256-256-256s-256 114.615-256 256v0zM401.28 342.4l-113.28 113.6-45.12-45.12 89.92-90.88-89.6-90.56 44.8-45.12 135.68 135.68-22.4 22.4z"></path>
+			</svg>`;
+			const absoluteStyles = this.isVertical ? 'left: 50%;' : 'top: 50%;';
+			const prevBtnStyles = this.isVertical ? 'top: -7%; transform: translateX(-50%) rotate(270deg);' : 'left: -7%; transform: translateY(-50%) rotate(180deg)';
+			const nextBtnStyles = this.isVertical ? 'top: 107%; transform: translate(-50%, -100%) rotate(90deg);' : 'left: 107%; transform: translate(-100%, -50%);';
+			this.nextBtn.style.cssText = this.prevBtn.style.cssText = `height: 30px; width: 30px; position: absolute; z-index: 5; display: block; line-height: 0; padding: 0; border: none; background: #00000000; border-radius: 100%; ${absoluteStyles} cursor: pointer;`;
+			this.nextBtn.innerHTML = this.prevBtn.innerHTML = buttonImage;
+			this.nextBtn.classList.add('next-btn');
+			this.nextBtn.style.cssText += nextBtnStyles;
+			this.prevBtn.classList.add('prev-btn');
+			this.prevBtn.style.cssText += prevBtnStyles;
+	
+			this.nextBtn.addEventListener('click', async () => {
+				if(!this.isPlayedAnimation) {
+					await this.next();
+					this.resetAutoplay();
+				}
+			});
+			this.prevBtn.addEventListener('click', async () => {
+				if(!this.isPlayedAnimation) {
+					await this.prev();
+					this.resetAutoplay();
+				}
+			});
+	
+			this.slider.append(this.prevBtn);
+			this.slider.append(this.nextBtn);
+		}
+	}
 
-		nextBtn.addEventListener('click', async () => {
-			if(!this.isPlayedAnimation) {
-				await this.next();
-				this.resetAutoplay();
-			}
-		});
-		prevBtn.addEventListener('click', async () => {
-			if(!this.isPlayedAnimation) {
-				await this.prev();
-				this.resetAutoplay();
-			}
-		});
-
-		this.slider.append(prevBtn);
-		this.slider.append(nextBtn);
+	removeButtons() {
+		this.arrows = false;
+		this.prevBtn.remove();
+		this.nextBtn.remove();
 	}
 
 	getCurentPosition() {

@@ -7,7 +7,14 @@ import { Slider } from './modules/slider';
 import { Form } from './modules/form';
 import { ModalMessage } from './modules/formMessageModal';
 import { Calculator } from './modules/calculator';
-import { mobileMaskInput } from './modules/mobileMask';
+import mobileMaskInput from './modules/mobileMask';
+import {numberValidation} from './modules/mobileMask';
+import moreStyles from './modules/moreStyles';
+import Filters from './modules/filters';
+import showImages from './modules/showImages';
+import faqList from './modules/faqList';
+import timerModal from './modules/timerModal';
+import adaptation from './modules/adaptation';
 
 let appState = {
   curentOpenedModal: undefined,
@@ -44,7 +51,7 @@ defaultRules = {
     reg: /^[А-яЎўїІіҐґЄєЁё ]*$/
   },
   phone: {
-    reg: /\S/
+    customInputValidator: numberValidation
       },
   email: {
     reg: /[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}/
@@ -61,7 +68,7 @@ shortRules = {
     reg: /^[А-яЎўїІіҐґЄєЁё ]*$/
   },
   phone: {
-    reg: /\S/
+    customInputValidator: numberValidation
   },
 },
 calculatorRules = {
@@ -82,7 +89,7 @@ defaultMessages = {
     reg: "Введіть ім'я, використовуючи кирилицю"
   },
   phone: {
-    reg: 'Перевірте, чи правильно ввели номер телефону'
+    customInputValidator: 'Перевірте, чи правильно ввели номер телефону'
   },
   email: {
     reg: 'Перевірте, чи правильно ввели пошту'
@@ -99,7 +106,7 @@ shortMessages = {
     reg: "Введіть ім'я, використовуючи кирилицю"
   },
   phone: {
-    reg: 'Перевірте, чи правильно ввели номер телефону'
+    customInputValidator: 'Перевірте, чи правильно ввели номер телефону'
   },
 },
 calculatorMessages = {
@@ -131,6 +138,22 @@ calculatorForm = new Calculator ('calculatorForm', calculatorRules, calculatorMe
 
 mobileMaskInput('mobilePhone');
 
+moreStyles('button-styles');
 
-export { appState, modals }
+const filterPorfolio = new Filters('portfolio-menu', 'portfolio-wrapper', 'portfolio-block', 'portfolio-no');
+
+showImages('sizes-block', [
+  'images/sizes-1-1.png',
+  'images/sizes-2-1.png',
+  'images/sizes-3-1.png',
+  'images/sizes-4-1.png'
+]);
+
+faqList('accordion-heading', 'ui-accordion-header-active', 'accordion-block');
+
+// timerModal('popup-gift', 'popup-consultation', 60000);
+
+adaptation();
+
+export { appState, modals, mainSlider, feedbackSlider }
       

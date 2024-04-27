@@ -1,3 +1,5 @@
+const { webpack } = require('webpack');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin'),
       ImageMinimizerPlugin = require('image-minimizer-webpack-plugin'),
       BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;

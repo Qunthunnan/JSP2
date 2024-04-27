@@ -102,6 +102,13 @@ export class Form {
             }
         }
 
+        if(this.rules[inputName].customInputValidator) {
+            if(!this.rules[inputName].customInputValidator(this.formElement.querySelector(`[name=${inputName}]`))) {
+                this.results[inputName] = false;
+                this.errors[inputName] = this.messages[inputName].customInputValidator;
+            }
+        }
+
         this.updateErrors(inputName);
         return this.results[inputName];
     }

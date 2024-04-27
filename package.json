@@ -8,7 +8,7 @@
 		"build": "webpack --config webpack/webpack.config.dev-build.js",
 		"prod": "webpack --config webpack/webpack.config.prod.js",
 		"serv": "webpack serve --config webpack/webpack.config.dev.js --open",
-		"watch": "webpack --config webpack/webpack.config.dev.js --watch"
+		"watch": "webpack --config webpack/webpack.config.dev-build.js --watch"
 	},
 	"author": "",
 	"license": "ISC",
