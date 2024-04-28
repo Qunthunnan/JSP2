@@ -1,4 +1,4 @@
-import {feedbackSlider, mainSlider} from '../main';
+import {feedbackSlider, mobileMenu} from '../main';
 
 export default function adaptation() {
     const displaySizes = [
@@ -12,15 +12,24 @@ export default function adaptation() {
 
     for (let display of displaySizes) {
         display.addEventListener('change', (e) => {
-            if(display.matches) {
-                feedbackSlider.rebuildSlider();
-                mainSlider.rebuildSlider();
-                if(+display.media.replace(/\D/g, '') < 992) {
-                    feedbackSlider.removeButtons();
-                } else {
-                    feedbackSlider.generateButtons();
-                }
-            }
+            adapt(display);
         });
+
+        if(display.matches) {
+            adapt(display);
+        }
+    }
+
+    function adapt(display) {
+        if(+display.media.replace(/\D/g, '') < 992) {
+            feedbackSlider.removeButtons();
+
+            mobileMenu.buildMobile();
+        } else {
+            feedbackSlider.generateButtons();
+
+            mobileMenu.buildDefault();
+        }
     }
 }
+

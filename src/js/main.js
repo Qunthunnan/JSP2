@@ -15,6 +15,7 @@ import showImages from './modules/showImages';
 import faqList from './modules/faqList';
 import timerModal from './modules/timerModal';
 import adaptation from './modules/adaptation';
+import { MobileMenu } from './modules/mobileMenu';
 
 let appState = {
   curentOpenedModal: undefined,
@@ -151,9 +152,12 @@ showImages('sizes-block', [
 
 faqList('accordion-heading', 'ui-accordion-header-active', 'accordion-block');
 
-// timerModal('popup-gift', 'popup-consultation', 60000);
+timerModal('popup-gift', 'popup-consultation', 60000);
+
+const mobileMenu = new MobileMenu('burger', 'burger-menu');
 
 adaptation();
 
-export { appState, modals, mainSlider, feedbackSlider }
+
+export { appState, modals, mainSlider, feedbackSlider, mobileMenu }
       

@@ -71,6 +71,8 @@ export class Slider {
 		}
 
 		this.go(this.curentFakeIndex);
+
+		this.adaptation();
 	}
 
 	rebuildSlider() {
@@ -242,8 +244,8 @@ export class Slider {
 		this.slider.style.cursor = 'grab';
 		
 		const mouseMove = (e) => {
-			let rangeY = y - (startY - e.clientY);
-			let rangeX = x - (startX - e.clientX);
+			let rangeY = y - (startY - (e.clientY || e.clientY === 0 ? e.clientY : e.touches[0].clientY));
+			let rangeX = x - (startX - (e.clientX || e.clientX === 0 ? e.clientX  : e.touches[0].clientX));
 
 			if(this.isVertical) {
 				if(y !== 0) {
@@ -255,8 +257,8 @@ export class Slider {
 				}
 			}
 
-			y = startY - e.clientY;
-			x = startX - e.clientX;
+			y = startY - (e.clientY || e.clientY === 0 ? e.clientY : e.touches[0].clientY);
+			x = startX - (e.clientX || e.clientX === 0 ? e.clientX : e.touches[0].clientX);
 		};
 
 		const mouseUp = (e) => {
@@ -293,6 +295,7 @@ export class Slider {
 
 				y = x = 0;
 				document.removeEventListener('mousemove', mouseMove);
+				document.removeEventListener('touchmove', mouseMove);
 			}
 		}
 
@@ -301,16 +304,24 @@ export class Slider {
 			if(!e.target.closest('.next-btn') && !e.target.closest('.prev-btn')) {
 				this.stopAutoplay();
 				this.slider.style.cursor = 'grabbing';
-				startY = e.clientY;
-				startX = e.clientX;
+
+				startY = e.clientY ? e.clientY : e.touches[0].clientY;
+				startX = e.clientX ? e.clientX : e.touches[0].clientX;
+
 				document.addEventListener('mousemove', mouseMove);
+				document.addEventListener('touchmove', mouseMove);
+
 				document.addEventListener('mouseup', mouseUp);
+				document.addEventListener('touchend', mouseUp);
 			}
 		};
 
 		this.slider.addEventListener('mouseenter', e => {
 			this.slider.addEventListener('mousedown', mouseDown);
 		});
+
+		this.slider.addEventListener('touchstart', mouseDown);
+
 		this.slider.addEventListener('mouseleave', e => {
 			this.slider.removeEventListener('mousedown', mouseDown);
 		});
@@ -374,5 +385,22 @@ export class Slider {
 		const axis = this.isVertical ? 'Y' : 'X';
 		this.sliderList.style.transform = `translate${axis}(${position}px)`;
 		this.curentPosition = position;
+	}
+
+	adaptation() {
+		const displaySizes = [
+			window.matchMedia('(min-width: 1400px)'), 
+			window.matchMedia('(max-width: 1399px)'),
+			window.matchMedia('(max-width: 1199px)'),
+			window.matchMedia('(max-width: 991px)'),
+			window.matchMedia('(max-width: 767px)'),
+			window.matchMedia('(max-width: 575px)')
+		 ];
+
+		 for (let display of displaySizes) {
+			display.addEventListener('change', (e) => {
+				this.rebuildSlider();
+			});
+		}
 	}
 }
