@@ -1,12 +1,14 @@
 import { appState, modals } from "../main";
 import loader from "../../assets/img/tube-spinner.svg";
+import { resetImageComments } from "./uploadImages";
 
 export class Form {
-    constructor(formClass, rules, messages) {
+    constructor(formClass, rules, messages, url) {
         this.formClass = formClass;
         this.formElement = document.querySelector(`.${formClass}`);
         this.rules = rules;
         this.messages = messages;
+        this.url = url;
         this.inputs = [];
         for (let input in rules) {
             this.inputs.push(input);
@@ -201,8 +203,10 @@ export class Form {
                 }
             }
         }
+
+        userData.upload = appState.file;
         
-        const response = await fetch('/server.php', {
+        const response = await fetch(this.url, {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
@@ -213,6 +217,7 @@ export class Form {
             loaderOverlay.remove();
             if(response.ok) {
                 this.formElement.reset();
+                resetImageComments();
                 modals.messageDone.showModal();
             } else {
                 console.error(response.status, response.statusText);

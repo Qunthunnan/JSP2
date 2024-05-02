@@ -16,9 +16,13 @@ import faqList from './modules/faqList';
 import timerModal from './modules/timerModal';
 import adaptation from './modules/adaptation';
 import { MobileMenu } from './modules/mobileMenu';
+import { uploadImages } from './modules/uploadImages';
+import { fileValidator } from './modules/uploadImages';
+import smoothLink from './modules/smoothLink';
 
 let appState = {
   curentOpenedModal: undefined,
+  file: undefined
 }
 
 const modals = {
@@ -45,7 +49,7 @@ feedbackSlider = new Slider({
   buttonsImage: require('../assets/img/right-arr.png')
 }),
 
-defaultRules = {
+designRules = {
   name: {
     min: 2,
     max: 256,
@@ -60,7 +64,27 @@ defaultRules = {
   message: {
     max: 2000,
     reg: /^[А-яЎўїІіҐґЄєЁё ]*$/
+  },
+  upload: {
+    customInputValidator: fileValidator
   }
+},
+consultationRules = {
+  name: {
+    min: 2,
+    max: 256,
+    reg: /^[А-яЎўїІіҐґЄєЁё ]*$/
+  },
+  phone: {
+    customInputValidator: numberValidation
+      },
+  email: {
+    reg: /[A-Za-z0-9\._%+\-]+@[A-Za-z0-9\.\-]+\.[A-Za-z]{2,}/
+  },
+  message: {
+    max: 2000,
+    reg: /^[А-яЎўїІіҐґЄєЁё ]*$/
+  },
 },
 shortRules = {
   name: {
@@ -81,9 +105,32 @@ calculatorRules = {
   },
   promo: {
     reg: /^[A-z0-9]*$/
+  },
+  upload: {
+    customInputValidator: fileValidator
   }
 },
-defaultMessages = {
+designMessages = {
+  name: {
+    min: 'Треба ввести як мінімум 2 символи',
+    max: 'Максимальна кількість символів у імені: 256',
+    reg: "Введіть ім'я, використовуючи кирилицю"
+  },
+  phone: {
+    customInputValidator: 'Перевірте, чи правильно ввели номер телефону'
+  },
+  email: {
+    reg: 'Перевірте, чи правильно ввели пошту'
+  },
+  message: {
+    max: 'Максимальна можлива кількість символів у комментарі: 2000',
+    reg: 'Якщо хочете залишити коментар до замовлення, напишіть його кирилицею'
+  },
+  upload: {
+    customInputValidator: 'Завантажте, будь ласка фото'
+  }
+},
+consultationMessages = {
   name: {
     min: 'Треба ввести як мінімум 2 символи',
     max: 'Максимальна кількість символів у імені: 256',
@@ -119,6 +166,9 @@ calculatorMessages = {
   },
   promo: {
     reg: 'Перевірте, чи правильно ввели промокод'
+  },
+  upload: {
+    customInputValidator: 'Завантажте, будь ласка фото'
   }
 },
 
@@ -132,10 +182,10 @@ promo = {
   'IWANTPOPART': 0.7
 },
 
-designForm = new Form('designForm', defaultRules, defaultMessages),
-consultationForm = new Form('consultationForm', defaultRules, defaultMessages),
-mainForm = new Form('mainForm', shortRules, shortMessages),
-calculatorForm = new Calculator ('calculatorForm', calculatorRules, calculatorMessages, prices, promo, 'calc-price');
+designForm = new Form('designForm', designRules, designMessages, '/server.php'),
+consultationForm = new Form('consultationForm', consultationRules, consultationMessages, '/server.php'),
+mainForm = new Form('mainForm', shortRules, shortMessages, '/server.php'),
+calculatorForm = new Calculator ('calculatorForm', calculatorRules, calculatorMessages, prices, promo, 'calc-price', '/server.php');
 
 mobileMaskInput('mobilePhone');
 
@@ -158,6 +208,9 @@ const mobileMenu = new MobileMenu('burger', 'burger-menu');
 
 adaptation();
 
+uploadImages();
+
+smoothLink();
 
 export { appState, modals, mainSlider, feedbackSlider, mobileMenu }
       

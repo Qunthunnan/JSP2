@@ -1,4 +1,6 @@
 import { Modal } from "./modal";
+import { appState } from "../main";
+
 export class OneTimeModal extends Modal {
     constructor(entries, modalClass, activityClass, contentClass, closeBtnClass, customAnimation) {
         super(entries, modalClass, activityClass, contentClass, closeBtnClass, customAnimation);
@@ -7,6 +9,9 @@ export class OneTimeModal extends Modal {
         const modalElement = document.querySelector(`.${this.modalClass}`);
         const modalContent = document.querySelector(`.${this.modalClass} .${this.contentClass}`);
         let entryElemens = [];
+
+        appState.curentOpenedModal = this.modalClass;
+
         for(let i in this.entries) {
             entryElemens.push(document.querySelectorAll(`.${this.entries[i]}`));
             entryElemens[i].forEach(element => {

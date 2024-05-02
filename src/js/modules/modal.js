@@ -24,6 +24,7 @@ export class Modal {
 
     closeModal  = (e = {target: document.querySelector(`.${this.closeBtnClass}`)} ) => {
         if (e.target.matches(`.${this.closeBtnClass}`) || !e.target.matches(`.${this.contentClass}`) && !e.target.closest(`.${this.contentClass}`) && e.target.classList[0] !== 'ripple') {
+            appState.curentOpenedModal = undefined; //updating general app state
             const modalElement = document.querySelector(`.${this.modalClass}`);
             const modalContent = document.querySelector(`.${this.modalClass} .${this.contentClass}`);
             const amimationClose = modalContent.animate([
@@ -43,7 +44,6 @@ export class Modal {
 
             amimationClose.finished.then( result => {
                 modalElement.classList.remove(this.activityClass);
-                appState.curentOpenedModal = undefined; //updating general app state
                 modalElement.removeEventListener('click', close);
             });
         }
@@ -56,6 +56,7 @@ export class Modal {
         modalElement.classList.add(this.activityClass);
 
         appState.curentOpenedModal = this.modalClass; //updating general app state
+
 
         const animationOpen = modalContent.animate([
             {
